@@ -1,4 +1,5 @@
 import { monthlyTaxTable } from './earned-income-tax-2026.mjs';
+import { wonFromManwon } from './money.mjs';
 
 const floorToTen = won => Math.floor(won / 10) * 10;
 
@@ -22,14 +23,6 @@ export function monthlyIncomeTax(taxable, family, children) {
   if (children === 1) tax -= 20_830;
   if (children >= 2) tax -= 45_830 + (children - 2) * 33_330;
   return tax < 1000 ? 0 : floorToTen(tax);
-}
-
-function wonFromManwon(raw, label) {
-  const value = String(raw ?? '').trim();
-  if (!/^\d+(?:\.\d{1,4})?$/.test(value)) throw new Error(label + '을 원 단위까지 입력해 주세요.');
-  const won = Math.round(Number(value) * 10_000);
-  if (!Number.isSafeInteger(won)) throw new Error(label + '의 금액을 확인해 주세요.');
-  return won;
 }
 
 function people(raw, min) {

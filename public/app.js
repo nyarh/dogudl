@@ -1,8 +1,11 @@
-import { Calculator, calculate, units } from './calculations.mjs?v=2026-11-salary';
+import { Calculator, calculate, units } from './calculations.mjs?v=2026-11-loan';
+import { maxLoanMonths } from './loan.mjs';
+import { renderLoanResult } from './loan-view.js';
 
 const catalog = [
   { id: 'basic', name: '기본 계산기', detail: '사칙연산과 백분율을 간편하게', icon: 'calculator', color: 'blue' },
   { id: 'salary', name: '연봉 실수령액 계산기', detail: '세전 연봉으로 월급과 공제 내역 확인', icon: 'wallet', color: 'green' },
+  { id: 'loan', name: '대출 이자 계산기', detail: '원리금균등 · 원금균등 · 만기일시상환 비교', icon: 'bank', color: 'cyan' },
   { id: 'percent', name: '퍼센트 계산기', detail: '전체 비율과 증감률 계산', icon: 'percent', color: 'purple' },
   { id: 'discount', name: '할인 계산기', detail: '할인 금액과 최종 가격 확인', icon: 'tag', color: 'coral' },
   { id: 'dates', name: '날짜 계산기', detail: '두 날짜 사이의 일수 계산', icon: 'calendar', color: 'green' },
@@ -10,7 +13,7 @@ const catalog = [
   { id: 'split', name: '더치페이 계산기', detail: '함께 쓴 금액을 원 단위로 정산', icon: 'users', color: 'pink' }
 ];
 const $ = selector => document.querySelector(selector);
-const icon = name => `<svg class="icon" aria-hidden="true"><use href="./assets/icons.svg?v=2026-11-salary#${name}"/></svg>`;
+const icon = name => `<svg class="icon" aria-hidden="true"><use href="./assets/icons.svg?v=2026-11-loan#${name}"/></svg>`;
 const toolIcon = tool => `<span class="tool-icon ${tool.color}">${icon(tool.icon)}</span>`;
 const dialog = $('#tool-dialog');
 const form = $('#special-view');
@@ -64,6 +67,12 @@ function localDate(offset) {
   return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
 }
 function formFields(id) {
+  if (id === 'loan') {
+    return field('principal', '대출금액 (만원)', 3000, {min:0.0001, step:0.0001})
+      + '<div class="pair">' + field('rate', '연이율 (%)', 4.5, {min:0})
+      + field('months', '대출기간 (개월)', 36, {min:1, max:maxLoanMonths, step:1}) + '</div>'
+      + '<p class="loan-note">고정금리로 매월 말에 상환한다고 가정합니다. 수수료와 별도 거치기간은 제외하며, 은행의 일할 계산이나 반올림 방식에 따라 실제 금액은 달라질 수 있습니다.</p>';
+  }
   if (id === 'salary') {
     return '<p class="salary-intro">2026년 7~12월 직장인 기준입니다. 퇴직금을 제외한 연봉을 입력하세요.</p>'
       + field('annual', '세전 연봉 (만원)', 4800, {min:0.0001, step:0.0001})
@@ -83,6 +92,11 @@ function renderResult() {
   try {
     const result = calculate(active.id,Object.fromEntries(new FormData(form)));
     box.replaceChildren();
+    if (result.plans) {
+      renderLoanResult(box, result.plans);
+      box.hidden = false;
+      return;
+    }
     for (const [tag,value] of [['small',result.label],['b',result.value],['p',result.detail]]) {
       const node = document.createElement(tag);
       node.textContent = value;
@@ -123,6 +137,11 @@ function showTool() {
   document.title = active.name + ' · 도구들';
   if (!basic) {
     form.innerHTML = '<div class="form-fields">' + formFields(active.id) + '<button class="primary" type="submit">계산하기</button></div><div id="form-result" class="form-result" aria-live="polite" hidden></div>';
+    if (active.id === 'loan') {
+      form.querySelector('button[type="submit"]').textContent = '상환 방식 비교하기';
+      $('#form-result').classList.add('loan-result');
+      renderResult();
+    }
     if (active.id === 'salary') {
       form.append($('#salary-basis').content.cloneNode(true));
       renderResult();

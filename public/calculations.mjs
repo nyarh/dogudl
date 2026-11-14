@@ -1,4 +1,6 @@
 import { monthlySalary } from './salary.mjs';
+import { compareLoans } from './loan.mjs';
+import { wonFromManwon } from './money.mjs';
 
 const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
 const pretty = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 12 });
@@ -112,6 +114,8 @@ function day(raw) {
 }
 export function calculate(id, form) {
   switch (id) {
+    case 'loan':
+      return { plans: compareLoans(wonFromManwon(form.principal, '대출금액'), number(form.rate, '연이율'), number(form.months, '대출기간')) };
     case 'salary': {
       const { gross, taxable, deductions, total, net } = monthlySalary(form);
       return {

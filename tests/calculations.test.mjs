@@ -5,6 +5,64 @@ import { monthlyIncomeTax, monthlySalary } from '../public/salary.mjs';
 
 const salaryExample = { annual: 4800, exempt: 20, family: 1, children: 0 };
 
+const loanExample = { principal: '3000', rate: '4.5', months: '36' };
+
+test('대출 3천만원의 세 상환 방식별 첫 달·마지막 달과 총이자를 비교한다', () => {
+  const { plans } = calculate('loan', loanExample);
+  assert.deepEqual(plans.map(plan => [
+    plan.name, plan.rows[0].payment, plan.rows.at(-1).payment, plan.totalInterest
+  ]), [
+    ['원리금균등', 892_408, 892_408, 2_126_679],
+    ['원금균등', 945_833, 836_458, 2_081_250],
+    ['만기일시상환', 112_500, 30_112_500, 4_050_000]
+  ]);
+});
+
+test('회차별 원금·이자·잔액과 요약이 일치하고 만기에 잔액이 0원이다', () => {
+  const principal = 12_345_678;
+  for (const rate of [0, 0.000001, 4.5, 18]) {
+    const { plans } = calculate('loan', { principal: '1234.5678', rate, months: 360 });
+    for (const plan of plans) {
+      let outstanding = principal;
+      let payments = 0;
+      let interest = 0;
+      assert.equal(plan.rows.length, 360);
+      for (const [index, row] of plan.rows.entries()) {
+        assert.equal(row.month, index + 1);
+        assert.ok(Number.isSafeInteger(row.principalPaid) && row.principalPaid >= 0);
+        assert.equal(row.interest, Math.round(outstanding * rate / 1200));
+        assert.equal(row.payment, row.interest + row.principalPaid);
+        outstanding -= row.principalPaid;
+        assert.equal(row.balance, outstanding);
+        payments += row.payment;
+        interest += row.interest;
+      }
+      assert.equal(outstanding, 0);
+      assert.equal(plan.totalPayment, payments);
+      assert.equal(plan.totalInterest, interest);
+      assert.equal(payments, principal + interest);
+    }
+  }
+});
+
+test('무이자 대출과 1개월 만기, 만기 전 이자만 납부하는 회차를 처리한다', () => {
+  const zero = calculate('loan', { principal: '0.001', rate: 0, months: 3 }).plans;
+  assert.deepEqual(zero.map(plan => plan.totalInterest), [0, 0, 0]);
+  assert.deepEqual(zero[0].rows, zero[1].rows);
+  assert.deepEqual(zero[2].rows.map(row => row.payment), [0, 0, 10]);
+  const single = calculate('loan', { principal: 120, rate: 12, months: 1 }).plans;
+  for (const plan of single) assert.deepEqual(plan.rows, [
+    { month: 1, principalPaid: 1_200_000, interest: 12_000, payment: 1_212_000, balance: 0 }
+  ]);
+});
+
+test('대출 입력에서 빈 값, 음수, 잘못된 기간과 원 미만 금액을 거부한다', () => {
+  for (const invalid of [{ principal: 0 }, { principal: 0.00001 }, { rate: '' }, { rate: -1 },
+    { rate: Infinity }, { months: '' }, { months: 0 }, { months: 2.5 }, { months: 1201 }]) {
+    assert.throws(() => calculate('loan', { ...loanExample, ...invalid }));
+  }
+});
+
 test('연봉 4,800만원에서 월 비과세 20만원을 포함한 실수령액과 공제액을 보여준다', () => {
   const { value, detail, breakdown } = calculate('salary', salaryExample);
   assert.equal(value, '3,444,560원');
