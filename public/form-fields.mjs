@@ -1,4 +1,4 @@
-import { units } from './calculations.mjs';
+import { units, defaultSalaryPeriod, salaryPeriods } from './calculations.mjs?v=2027-h1';
 import { maxLoanMonths } from './loan.mjs';
 function field(name, label, value, options = {}) {
   const { type = 'number', min, max, step = 'any' } = options;
@@ -38,7 +38,11 @@ export function formFields(id) {
       + '<p class="loan-note">고정금리로 매월 말에 상환한다고 가정합니다. 수수료와 별도 거치기간은 제외하며, 은행의 일할 계산이나 반올림 방식에 따라 실제 금액은 달라질 수 있습니다.</p>';
   }
   if (id === 'salary') {
-    return '<p class="salary-intro">2026년 7~12월 직장인 기준입니다. 퇴직금을 제외한 연봉을 입력하세요.</p>'
+    const periods = Object.entries(salaryPeriods).map(([id, period]) =>
+      [id, period.employmentAssumption ? period.label + ' (예상)' : period.label]);
+    return select('period', '적용 기간', periods, defaultSalaryPeriod)
+      + '<p class="field-hint" id="salary-assumption" hidden></p>'
+      + '<p class="salary-intro">퇴직금을 제외한 직장인 세전 연봉을 입력하세요.</p>'
       + field('annual', '세전 연봉 (만원)', 4800, {min:0.0001, step:0.0001})
       + field('exempt', '연봉에 포함된 월 비과세액 (만원)', 20, {min:0, step:0.0001})
       + '<p class="field-hint">식대 등 매월 비과세로 받는 금액을 합산하세요. 없으면 0으로 입력하세요.</p>'

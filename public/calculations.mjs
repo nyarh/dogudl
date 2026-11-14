@@ -1,4 +1,5 @@
-import { monthlySalary } from './salary.mjs';
+import { monthlySalary } from './salary.mjs?v=2027-h1';
+export { defaultSalaryPeriod, salaryPeriods } from './salary.mjs?v=2027-h1';
 import { compareLoans } from './loan.mjs';
 import { convertRent } from './rent.mjs';
 import { wonFromManwon } from './money.mjs';
@@ -139,11 +140,12 @@ export function calculate(id, form) {
     case 'loan':
       return { plans: compareLoans(wonFromManwon(form.principal, '대출금액'), number(form.rate, '연이율'), number(form.months, '대출기간')) };
     case 'salary': {
-      const { gross, taxable, deductions, total, net } = monthlySalary(form);
+      const { period, gross, taxable, deductions, total, net } = monthlySalary(form);
       return {
-        label: '예상 월 실수령액',
+        label: period.label + ' · 예상 월 실수령액',
         value: format(net) + '원',
         detail: '세전 월급 ' + format(gross) + '원 · 월 과세급여 ' + format(taxable) + '원',
+        note: period.employmentAssumption,
         breakdown: [...deductions, ['월 공제 합계', total]].map(([label, amount]) => [label, format(amount) + '원'])
       };
     }

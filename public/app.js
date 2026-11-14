@@ -1,8 +1,8 @@
-import { Calculator, calculate } from './calculations.mjs?v=2026-11-rent';
-import { formFields, unitFields } from './form-fields.mjs';
-import { renderLoanResult } from './loan-view.js?v=2026-11-rent';
+import { Calculator, calculate, salaryPeriods } from './calculations.mjs?v=2027-h1';
+import { formFields, unitFields } from './form-fields.mjs?v=2027-h1';
+import { renderLoanResult } from './loan-view.js?v=2027-h1';
 
-import { catalog, descriptions, siteOrigin, toolPath, toolFromPath } from './catalog.mjs';
+import { catalog, descriptions, siteOrigin, toolPath, toolFromPath } from './catalog.mjs?v=2027-h1';
 
 const $ = selector => document.querySelector(selector);
 const icon = name => `<svg class="icon" aria-hidden="true"><use href="/assets/icons.svg?v=2026-11-rent#${name}"/></svg>`;
@@ -50,6 +50,18 @@ function updateRentFields() {
   monthly.labels[0].hidden = toMonthly;
   deposit.labels[0].querySelector('span').textContent = toMonthly ? '월세로 바꾼 뒤 남길 보증금 (만원)' : '현재 월세 보증금 (만원)';
 }
+function updateSalaryBasis() {
+  const selected = form.elements.period.value;
+  const period = salaryPeriods[selected];
+  const hint = $('#salary-assumption');
+  hint.textContent = period.employmentAssumption || '';
+  hint.hidden = !period.employmentAssumption;
+  for (const node of form.querySelectorAll('[data-salary-period]')) {
+    node.hidden = node.dataset.salaryPeriod !== selected;
+  }
+  $('#salary-pension-rate').textContent = (period.pensionBps / 100).toFixed(2) + '%';
+  $('#salary-care-rate').textContent = (period.careBps / 100).toFixed(2) + '%';
+}
 function renderResult() {
   const box = $('#form-result');
   try {
@@ -68,6 +80,11 @@ function renderResult() {
       const node = document.createElement(tag);
       node.textContent = value;
       box.append(node);
+    }
+    if (result.note) {
+      const note = document.createElement('p');
+      note.textContent = result.note;
+      box.append(note);
     }
     if (result.breakdown) {
       const list = document.createElement('dl');
@@ -130,12 +147,17 @@ function showTool() {
     }
     if (active.id === 'salary') {
       form.append($('#salary-basis').content.cloneNode(true));
+      updateSalaryBasis();
       renderResult();
     }
   } else refreshCalculator();
 }
 form.addEventListener('input', () => { $('#form-result').hidden = true; });
 form.addEventListener('change', event => {
+  if (event.target.name === 'period') {
+    updateSalaryBasis();
+    if (form.checkValidity()) renderResult();
+  }
   if (event.target.name === 'direction') {
     updateRentFields();
     if (form.checkValidity()) renderResult();

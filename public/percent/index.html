@@ -13,7 +13,7 @@
   <title>퍼센트 계산기 · 도구들</title>
   <link rel="icon" href="/assets/brand.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css?v=2026-11-rent">
-  <script type="module" src="/app.js?v=2026-11-seo"></script>
+  <script type="module" src="/app.js?v=2027-h1"></script>
 </head>
 <body>
   <a class="skip" href="#workspace">계산기로 바로가기</a>
@@ -68,10 +68,15 @@
             <p>퇴직금을 제외한 연봉을 12개월로 균등 분할하고, 월급에서 비과세액을 뺀 금액을 보험료 산정 보수로 사용합니다. 회사가 신고한 보수, 상여금 지급 시기, 보험료 정산이나 감면에 따라 급여명세서와 차이가 날 수 있습니다.</p>
             <ul>
               <li>근로소득세는 2026년 3월 시행 간이세액표의 100% 원천징수 기준입니다. 가족 수에는 본인과 기본공제 대상 가족을 포함합니다. 지방소득세는 근로소득세의 10%입니다. <a href="https://teht.hometax.go.kr/doc/sf/a/a/근로소득%20간이세액표_2026.03.01.xlsx">홈택스 간이세액표 (엑셀)</a></li>
-              <li>국민연금 근로자 부담률은 4.75%이며, 7월부터 기준소득월액은 41만~659만원입니다. <a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0038M0.do">국민연금공단 보험료 안내</a></li>
-              <li>건강보험은 보수의 3.595%, 장기요양보험은 건강보험료의 13.14%를 적용합니다. <a href="https://edi.nhis.or.kr/portal/images/popup/20251204_pop01longdesc.html">국민건강보험공단 보험료율</a></li>
-              <li>고용보험 근로자 부담률은 0.9%입니다. 산재보험료는 사업주가 부담합니다. <a href="https://www.moel.go.kr/info/astmgmt/employ/employList.do">고용노동부 고용보험 안내</a></li>
+              <li>국민연금 근로자 부담률은 <span id="salary-pension-rate">4.75%</span>입니다. 2026년 7월부터 2027년 6월까지 기준소득월액은 41만~659만 원입니다. <a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0016M0.do?menuId=MN24001108">국민연금공단 연도별 보험료율</a></li>
+              <li>건강보험은 보수의 3.595%, 장기요양보험은 본인 부담 건강보험료의 <span id="salary-care-rate">13.14%</span>를 적용합니다.
+                <a data-salary-period="2026-H2" href="https://edi.nhis.or.kr/portal/images/popup/20251204_pop01longdesc.html">2026년 보험료율</a>
+                <span data-salary-period="2027-H1" hidden><a href="https://m.korea.kr/briefing/pressReleaseView.do?newsId=156780667">2027년 건강보험료율</a> · <a href="https://www.mohw.go.kr/gallery.es?act=view&amp;bid=0003&amp;list_no=380579&amp;mid=a10505000000">2027년 장기요양보험료율</a></span></li>
+              <li data-salary-period="2026-H2">고용보험 근로자 부담률은 0.9%입니다. <a href="https://www.moel.go.kr/info/astmgmt/employ/employList.do">고용노동부 고용보험 안내</a></li>
+              <li data-salary-period="2027-H1" hidden>고용보험은 근로자 부담률을 0.9%에서 1.0%로 올리는 안을 적용했습니다. <a href="https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=19866">고용노동부 개편안</a></li>
+              <li data-salary-period="2027-H1" hidden>2027년 상반기 예상액은 2026년 11월 15일 확인 기준입니다. 근로소득 간이세액표와 건강보험료 상·하한은 2026년 기준을 사용합니다. <a href="https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000270472">건강보험료 상·하한 고시</a></li>
             </ul>
+            <p>산재보험료는 사업주가 부담합니다.</p>
           </details>
         </template>
       </section>

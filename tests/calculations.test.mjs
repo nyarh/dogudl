@@ -107,6 +107,30 @@ test('연봉 4,800만원에서 월 비과세 20만원을 포함한 실수령액�
   ]);
 });
 
+test('같은 급여에서 기간을 바꾸면 2027년 예상 요율과 고용보험 인상안 가정이 적용된다', () => {
+  const previous = calculate('salary', { ...salaryExample, period: '2026-H2' });
+  assert.deepEqual(previous, calculate('salary', salaryExample));
+  assert.equal(previous.note, undefined);
+  const next = calculate('salary', { ...salaryExample, period: '2027-H1' });
+  assert.match(next.label, /2027년 상반기/);
+  assert.match(next.note, /고용보험 근로자 부담률은 1\.0% 인상안을 가정/);
+  assert.equal(next.value, '3,430,230원');
+  assert.deepEqual(next.breakdown, [
+    ['국민연금', '190,000원'], ['건강보험', '136,610원'], ['장기요양보험', '18,980원'],
+    ['고용보험', '38,000원'], ['근로소득세', '169,260원'], ['지방소득세', '16,920원'], ['월 공제 합계', '569,770원']
+  ]);
+  assert.throws(() => calculate('salary', { ...salaryExample, period: '2027-H2' }), /적용 기간/);
+});
+
+test('2027년 상반기에 국민연금 기준소득월액 범위와 기존 건강보험료 상·하한을 사용한다', () => {
+  const employee = { ...salaryExample, period: '2027-H1', exempt: 0 };
+  const low = monthlySalary({ ...employee, annual: 300 });
+  assert.deepEqual(low.deductions.slice(0, 3), [['국민연금', 20_500], ['건강보험', 10_080], ['장기요양보험', 1_400]]);
+  const high = monthlySalary({ ...employee, annual: 240_000 });
+  assert.deepEqual(high.deductions.slice(0, 2), [['국민연금', 329_500], ['건강보험', 4_591_740]]);
+  assert.equal(high.gross, high.net + high.total);
+});
+
 test('홈택스 표의 급여 경계, 공제대상 가족 및 2026년 자녀공제를 적용한다', () => {
   assert.equal(monthlyIncomeTax(1_059_999, 1, 0), 0);
   assert.equal(monthlyIncomeTax(1_060_000, 1, 0), 1040);
