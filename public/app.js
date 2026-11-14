@@ -1,4 +1,4 @@
-import { Calculator, calculate, units } from './calculations.mjs';
+import { Calculator, calculate, units } from './calculations.mjs?v=2026-11-salary';
 
 const catalog = [
   { id: 'basic', name: '기본 계산기', detail: '사칙연산과 백분율을 간편하게', icon: 'calculator', color: 'blue' },
@@ -10,7 +10,7 @@ const catalog = [
   { id: 'split', name: '더치페이 계산기', detail: '함께 쓴 금액을 원 단위로 정산', icon: 'users', color: 'pink' }
 ];
 const $ = selector => document.querySelector(selector);
-const icon = name => `<svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#${name}"/></svg>`;
+const icon = name => `<svg class="icon" aria-hidden="true"><use href="./assets/icons.svg?v=2026-11-salary#${name}"/></svg>`;
 const toolIcon = tool => `<span class="tool-icon ${tool.color}">${icon(tool.icon)}</span>`;
 const dialog = $('#tool-dialog');
 const form = $('#special-view');
