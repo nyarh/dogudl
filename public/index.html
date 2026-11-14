@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f8fb">
+  <meta name="description" content="도구들에서 기본 계산, 퍼센트, 할인 금액, 날짜 차이, 단위 변환, 더치페이를 무료로 계산하세요.">
+  <title>생활 계산기 · 도구들</title>
+  <link rel="icon" href="./assets/brand.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">계산기로 바로가기</a>
+  <header class="masthead">
+    <div class="container header-inner">
+      <a class="brand" href="#basic" aria-label="도구들 홈"><img src="./assets/brand.svg" alt="" width="34" height="34"><span>도구들</span></a>
+      <nav aria-label="주 메뉴">
+        <a class="nav-item active" href="#basic" id="nav-tools">계산기</a>
+        <button class="nav-item" id="nav-favorites">즐겨찾기</button>
+      </nav>
+      <button class="search-trigger" id="search-trigger" aria-label="도구 검색 (Alt+K)"><svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#search"/></svg><span>도구 검색</span><kbd>Alt K</kbd></button>
+    </div>
+  </header>
+  <main class="container">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-art" aria-hidden="true"><img src="./assets/calculator-hero.jpg" alt="" width="720" height="480" fetchpriority="high"></div>
+      <div class="hero-copy">
+        <h1 id="hero-title">생활 계산기</h1>
+        <p>사칙연산부터 할인, 정산까지.<br>일상에 필요한 계산을 한곳에서 해결하세요.</p>
+      </div>
+    </section>
+    <div class="workspace" id="workspace">
+      <section class="panel work-panel" aria-labelledby="tool-title">
+        <div class="panel-heading">
+          <div class="heading-group"><span id="active-icon" class="tool-icon blue"><svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#calculator"/></svg></span><h2 id="tool-title" tabindex="-1">기본 계산기</h2></div>
+          <button class="quiet-button" id="history-trigger"><svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#history"/></svg><span>계산 기록</span></button>
+        </div>
+        <div id="basic-view">
+          <div class="display">
+            <span class="display-label">계산 결과</span>
+            <div class="readout"><div id="expression"></div><output id="value" aria-live="polite" aria-label="현재 값">0</output></div>
+          </div>
+          <div class="keypad" id="keypad" aria-label="계산기 키패드">
+            <button class="key utility" data-key="clear" aria-label="전체 지우기">AC</button>
+            <button class="key utility" data-key="sign" aria-label="부호 변경">±</button>
+            <button class="key utility" data-key="%" aria-label="백분율">%</button>
+            <button class="key operator" data-key="/" aria-label="나누기">÷</button>
+            <button class="key" data-key="7">7</button><button class="key" data-key="8">8</button><button class="key" data-key="9">9</button><button class="key operator" data-key="*" aria-label="곱하기">×</button>
+            <button class="key" data-key="4">4</button><button class="key" data-key="5">5</button><button class="key" data-key="6">6</button><button class="key operator" data-key="-" aria-label="빼기">−</button>
+            <button class="key" data-key="1">1</button><button class="key" data-key="2">2</button><button class="key" data-key="3">3</button><button class="key operator" data-key="+" aria-label="더하기">+</button>
+            <button class="key" data-key="0">0</button><button class="key" data-key=".">.</button>
+            <button class="key" data-key="back" aria-label="한 자리 지우기"><svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#back"/></svg></button>
+            <button class="key equal" data-key="=" aria-label="계산하기">=</button>
+          </div>
+          <div class="keyboard-note"><svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#keyboard"/></svg>키보드로도 입력할 수 있어요</div>
+        </div>
+        <form id="special-view" hidden></form>
+      </section>
+      <aside class="panel list-panel" aria-labelledby="other-tools">
+        <div class="list-heading"><h2 id="other-tools">다른 계산기</h2><span id="other-count">5개</span></div>
+        <div id="tool-list"></div>
+      </aside>
+    </div>
+    <noscript>계산기를 사용하려면 브라우저의 자바스크립트를 켜 주세요.</noscript>
+  </main>
+  <footer class="site-footer"><div class="container footer-inner"><span class="footer-brand"><img src="./assets/brand.svg" alt="" width="20" height="20">도구들</span><span>© dogudl.com</span></div></footer>
+  <dialog id="tool-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-header"><h2 id="dialog-title"></h2><button id="dialog-close" class="icon-button" aria-label="닫기"><svg class="icon" aria-hidden="true"><use href="./assets/icons.svg#close"/></svg></button></div>
+    <div id="dialog-content"></div>
+  </dialog>
+</body>
+</html>
