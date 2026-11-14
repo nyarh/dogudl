@@ -1,3 +1,5 @@
+import { monthlySalary } from './salary.mjs';
+
 const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
 const pretty = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 12 });
 export function format(value) {
@@ -110,6 +112,15 @@ function day(raw) {
 }
 export function calculate(id, form) {
   switch (id) {
+    case 'salary': {
+      const { gross, taxable, deductions, total, net } = monthlySalary(form);
+      return {
+        label: '예상 월 실수령액',
+        value: format(net) + '원',
+        detail: '세전 월급 ' + format(gross) + '원 · 월 과세급여 ' + format(taxable) + '원',
+        breakdown: [...deductions, ['월 공제 합계', total]].map(([label, amount]) => [label, format(amount) + '원'])
+      };
+    }
     case 'percent': {
       const base = number(form.base, '기준값');
       const part = number(form.part, '비율 또는 비교값');

@@ -1,6 +1,49 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Calculator, calculate } from '../public/calculations.mjs';
+import { monthlyIncomeTax, monthlySalary } from '../public/salary.mjs';
+
+const salaryExample = { annual: 4800, exempt: 20, family: 1, children: 0 };
+
+test('연봉 4,800만원에서 월 비과세 20만원을 포함한 실수령액과 공제액을 보여준다', () => {
+  const { value, detail, breakdown } = calculate('salary', salaryExample);
+  assert.equal(value, '3,444,560원');
+  assert.equal(detail, '세전 월급 4,000,000원 · 월 과세급여 3,800,000원');
+  assert.deepEqual(breakdown, [
+    ['국민연금', '180,500원'], ['건강보험', '136,610원'], ['장기요양보험', '17,950원'],
+    ['고용보험', '34,200원'], ['근로소득세', '169,260원'], ['지방소득세', '16,920원'], ['월 공제 합계', '555,440원']
+  ]);
+});
+
+test('홈택스 표의 급여 경계, 공제대상 가족 및 2026년 자녀공제를 적용한다', () => {
+  assert.equal(monthlyIncomeTax(1_059_999, 1, 0), 0);
+  assert.equal(monthlyIncomeTax(1_060_000, 1, 0), 1040);
+  assert.equal(monthlyIncomeTax(3_500_000, 4, 0), 49_340);
+  assert.equal(monthlyIncomeTax(3_519_999, 4, 1), 28_510);
+  assert.equal(monthlyIncomeTax(3_500_000, 4, 2), 3510);
+  assert.equal(monthlyIncomeTax(3_500_000, 4, 3), 0);
+  assert.equal(monthlyIncomeTax(10_000_000, 12, 3), 960_840 - 30_000 - 79_160);
+  assert.equal(monthlyIncomeTax(10_000_001, 1, 0), 1_532_400);
+  assert.equal(monthlyIncomeTax(14_000_000, 1, 0), 2_904_400);
+  assert.equal(monthlyIncomeTax(15_000_000, 1, 0), 3_276_800);
+  assert.equal(monthlyIncomeTax(100_000_000, 1, 0), 38_392_000);
+});
+
+test('저소득과 고소득의 보험료 상·하한 및 원 미만 월급을 처리한다', () => {
+  const low = monthlySalary({ ...salaryExample, annual: '300.0001', exempt: 0 });
+  assert.equal(low.gross, 250_000);
+  assert.deepEqual(low.deductions.slice(0, 2), [['국민연금', 19_470], ['건강보험', 10_080]]);
+  const high = monthlySalary({ ...salaryExample, annual: 240_000, exempt: 0 });
+  assert.deepEqual(high.deductions.slice(0, 2), [['국민연금', 313_020], ['건강보험', 4_591_740]]);
+  assert.equal(high.net + high.total, high.gross);
+});
+
+test('연봉이나 비과세액과 가족 입력이 맞지 않으면 이유를 안내한다', () => {
+  for (const invalid of [{ annual: '' }, { annual: -1 }, { annual: 0 }, { exempt: 401 },
+    { family: 0 }, { family: 1.5 }, { children: -1 }, { children: 1 }]) {
+    assert.throws(() => calculate('salary', { ...salaryExample, ...invalid }));
+  }
+});
 
 function sequence(...keys) {
   const calc = new Calculator();

@@ -2,6 +2,7 @@ import { Calculator, calculate, units } from './calculations.mjs';
 
 const catalog = [
   { id: 'basic', name: '기본 계산기', detail: '사칙연산과 백분율을 간편하게', icon: 'calculator', color: 'blue' },
+  { id: 'salary', name: '연봉 실수령액 계산기', detail: '세전 연봉으로 월급과 공제 내역 확인', icon: 'wallet', color: 'green' },
   { id: 'percent', name: '퍼센트 계산기', detail: '전체 비율과 증감률 계산', icon: 'percent', color: 'purple' },
   { id: 'discount', name: '할인 계산기', detail: '할인 금액과 최종 가격 확인', icon: 'tag', color: 'coral' },
   { id: 'dates', name: '날짜 계산기', detail: '두 날짜 사이의 일수 계산', icon: 'calendar', color: 'green' },
@@ -63,6 +64,14 @@ function localDate(offset) {
   return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
 }
 function formFields(id) {
+  if (id === 'salary') {
+    return '<p class="salary-intro">2026년 7~12월 직장인 기준입니다. 퇴직금을 제외한 연봉을 입력하세요.</p>'
+      + field('annual', '세전 연봉 (만원)', 4800, {min:0.0001, step:0.0001})
+      + field('exempt', '연봉에 포함된 월 비과세액 (만원)', 20, {min:0, step:0.0001})
+      + '<p class="field-hint">식대 등 매월 비과세로 받는 금액을 합산하세요. 없으면 0으로 입력하세요.</p>'
+      + '<div class="pair salary-family">' + field('family', '공제대상 가족 (본인 포함)', 1, {min:1, step:1})
+      + field('children', '그중 8~20세 자녀', 0, {min:0, step:1}) + '</div>';
+  }
   if (id === 'percent') return select('mode','계산 방식',[['portion','기준값의 몇 %는 얼마인가요?'],['ratio','비교값은 기준값의 몇 %인가요?'],['change','기준값에서 몇 % 변했나요?']],'portion') + field('base','기준값',10000) + field('part','비율 (%)',15);
   if (id === 'discount') return field('price','원래 가격 (원)',50000,{min:0,step:1}) + field('rate','할인율 (%)',20,{min:0,max:100});
   if (id === 'dates') return field('start','시작일',localDate(0),{type:'date'}) + field('end','종료일',localDate(7),{type:'date'}) + '<label class="check"><input type="checkbox" name="inclusive">시작일을 1일로 포함</label>';
@@ -78,6 +87,19 @@ function renderResult() {
       const node = document.createElement(tag);
       node.textContent = value;
       box.append(node);
+    }
+    if (result.breakdown) {
+      const list = document.createElement('dl');
+      list.className = 'deductions';
+      list.setAttribute('aria-label', '월 공제 내역');
+      for (const [label, value] of result.breakdown) {
+        const term = document.createElement('dt');
+        const amount = document.createElement('dd');
+        term.textContent = label;
+        amount.textContent = value;
+        list.append(term, amount);
+      }
+      box.append(list);
     }
   } catch (error) {
     const message = document.createElement('p');
@@ -97,9 +119,14 @@ function showTool() {
   $('#basic-view').hidden = !basic;
   form.hidden = basic;
   $('#tool-list').innerHTML = catalog.filter(tool => tool !== active).map(toolRow).join('');
+  $('#other-count').textContent = (catalog.length - 1) + '개';
   document.title = active.name + ' · 도구들';
   if (!basic) {
     form.innerHTML = '<div class="form-fields">' + formFields(active.id) + '<button class="primary" type="submit">계산하기</button></div><div id="form-result" class="form-result" aria-live="polite" hidden></div>';
+    if (active.id === 'salary') {
+      form.append($('#salary-basis').content.cloneNode(true));
+      renderResult();
+    }
   } else refreshCalculator();
 }
 form.addEventListener('input', () => { $('#form-result').hidden = true; });

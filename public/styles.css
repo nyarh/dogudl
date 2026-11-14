@@ -100,6 +100,19 @@ h2 { font-size: 21px; line-height: 1.4; letter-spacing: -.055em; }
 .form-result b { display: block; font-size: 26px; margin: 5px 0; overflow-wrap: anywhere; }
 .form-result small, .form-result p { font-size: 13px; line-height: 1.6; }
 .form-error { color: #a43b30; font-size: 14px; }
+.salary-intro, .field-hint, .salary-basis { color: var(--muted); font-size: 13px; line-height: 1.65; word-break: keep-all; }
+.field-hint { margin-top: -10px; font-size: 12px; }
+.salary-family { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.salary-family .field { grid-template-rows: 1fr auto; }
+.deductions { display: grid; grid-template-columns: 1fr auto; gap: 7px 12px; margin: 15px 0 0; padding-top: 13px; border-top: 1px solid #d4ddf3; font-size: 14px; }
+.deductions dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.deductions :nth-last-child(-n+2) { padding-top: 9px; border-top: 1px solid #d4ddf3; font-weight: 700; }
+.salary-basis { margin-top: 16px; }
+.salary-basis summary { width: fit-content; color: #465574; font-weight: 650; cursor: pointer; }
+.salary-basis p, .salary-basis ul { margin: 10px 0 0; }
+.salary-basis ul { padding-inline-start: 18px; }
+.salary-basis li + li { margin-top: 6px; }
+.salary-basis a { color: #284ab9; text-decoration: underline; text-underline-offset: 2px; }
 dialog { width: min(450px,calc(100vw - 28px)); max-height: min(600px,85vh); padding: 24px; border: 1px solid var(--border); border-radius: 18px; color: inherit; box-shadow: 0 20px 70px #15244333; }
 dialog::backdrop { background: #16223855; }
 .dialog-header { margin-bottom: 17px; }
