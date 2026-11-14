@@ -1,25 +1,17 @@
-import { Calculator, calculate, units } from './calculations.mjs?v=2026-11-rent';
-import { maxLoanMonths } from './loan.mjs';
+import { Calculator, calculate } from './calculations.mjs?v=2026-11-rent';
+import { formFields, unitFields } from './form-fields.mjs';
 import { renderLoanResult } from './loan-view.js?v=2026-11-rent';
 
-const catalog = [
-  { id: 'basic', name: '기본 계산기', detail: '사칙연산과 백분율을 간편하게', icon: 'calculator', color: 'blue' },
-  { id: 'salary', name: '연봉 실수령액 계산기', detail: '세전 연봉으로 월급과 공제 내역 확인', icon: 'wallet', color: 'green' },
-  { id: 'loan', name: '대출 이자 계산기', detail: '원리금균등 · 원금균등 · 만기일시상환 비교', icon: 'bank', color: 'cyan' },
-  { id: 'rent', name: '전월세 상호전환 계산기', detail: '전세 보증금과 월세를 원하는 전환율로 환산', icon: 'house', color: 'purple' },
-  { id: 'percent', name: '퍼센트 계산기', detail: '전체 비율과 증감률 계산', icon: 'percent', color: 'purple' },
-  { id: 'discount', name: '할인 계산기', detail: '할인 금액과 최종 가격 확인', icon: 'tag', color: 'coral' },
-  { id: 'dates', name: '날짜 계산기', detail: '두 날짜 사이의 일수 계산', icon: 'calendar', color: 'green' },
-  { id: 'units', name: '단위 변환기', detail: '길이, 면적, 무게, 부피 변환', icon: 'ruler', color: 'cyan' },
-  { id: 'split', name: '더치페이 계산기', detail: '함께 쓴 금액을 원 단위로 정산', icon: 'users', color: 'pink' }
-];
+import { catalog, descriptions, siteOrigin, toolPath, toolFromPath } from './catalog.mjs';
+
 const $ = selector => document.querySelector(selector);
-const icon = name => `<svg class="icon" aria-hidden="true"><use href="./assets/icons.svg?v=2026-11-rent#${name}"/></svg>`;
+const icon = name => `<svg class="icon" aria-hidden="true"><use href="/assets/icons.svg?v=2026-11-rent#${name}"/></svg>`;
 const toolIcon = tool => `<span class="tool-icon ${tool.color}">${icon(tool.icon)}</span>`;
 const dialog = $('#tool-dialog');
 const form = $('#special-view');
 const calculator = new Calculator();
 let active = catalog[0];
+let renderedToolId = null;
 let recent = [];
 let dialogMode = '';
 
@@ -36,7 +28,7 @@ function toggleFavorite(id) {
   try { localStorage.setItem('dogudl.favorites', JSON.stringify([...favorites])); } catch { /* Session-only when storage is unavailable. */ }
 }
 function toolRow(tool) {
-  return `<a class="tool-row" href="#${tool.id}" data-open="${tool.id}">${toolIcon(tool)}<span class="tool-info"><span class="tool-name">${tool.name}</span><span class="tool-detail">${tool.detail}</span></span><svg class="icon row-arrow" aria-hidden="true"><use href="./assets/icons.svg#arrow"/></svg></a>`;
+  return `<a class="tool-row" href="${toolPath(tool.id)}" data-open="${tool.id}">${toolIcon(tool)}<span class="tool-info"><span class="tool-name">${tool.name}</span><span class="tool-detail">${tool.detail}</span></span><svg class="icon row-arrow" aria-hidden="true"><use href="/assets/icons.svg#arrow"/></svg></a>`;
 }
 function refreshCalculator() {
   $('#expression').textContent = calculator.error || calculator.expression;
@@ -49,57 +41,6 @@ function enterKey(key) {
   refreshCalculator();
 }
 
-function field(name, label, value, options = {}) {
-  const { type = 'number', min, max, step = 'any' } = options;
-  return `<label class="field"><span>${label}</span><input required name="${name}" type="${type}" value="${value}" ${type === 'number' ? 'step="' + step + '"' : ''} ${min !== undefined ? 'min="' + min + '"' : ''} ${max !== undefined ? 'max="' + max + '"' : ''}></label>`;
-}
-function select(name, label, entries, selected) {
-  const options = entries.map(([id,text]) => `<option value="${id}" ${id === selected ? 'selected' : ''}>${text}</option>`).join('');
-  return `<label class="field"><span>${label}</span><select name="${name}">${options}</select></label>`;
-}
-function unitFields(category) {
-  const entries = Object.keys(units[category].factors).map(name => [name,name]);
-  const defaultPair = { length:['m','cm'], area:['㎡','평'], mass:['kg','g'], volume:['L','mL'] }[category];
-  return select('from','입력 단위',entries,defaultPair[0]) + select('to','결과 단위',entries,defaultPair[1]);
-}
-function localDate(offset) {
-  const date = new Date();
-  date.setDate(date.getDate() + offset);
-  return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
-}
-function formFields(id) {
-  if (id === 'rent') {
-    const money = { min: 0, step: 0.0001 };
-    return `<fieldset class="rent-direction"><legend>전환 방향</legend><div>
-      <label><input type="radio" name="direction" value="toMonthly" checked><span>전세 → 월세</span></label>
-      <label><input type="radio" name="direction" value="toJeonse"><span>월세 → 전세</span></label>
-      </div></fieldset>`
-      + field('jeonse', '현재 전세 보증금 (만원)', 30000, money)
-      + field('deposit', '월세로 바꾼 뒤 남길 보증금 (만원)', 10000, money)
-      + field('monthly', '현재 월세 (만원)', 80, money)
-      + field('rate', '연 전월세 전환율 (%)', 4.8, { min: 0 })
-      + '<p class="field-hint">4.8%는 예시입니다. 비교할 전환율을 직접 입력하세요. 결과는 원 단위로 반올림합니다.</p>';
-  }
-  if (id === 'loan') {
-    return field('principal', '대출금액 (만원)', 3000, {min:0.0001, step:0.0001})
-      + '<div class="pair">' + field('rate', '연이율 (%)', 4.5, {min:0})
-      + field('months', '대출기간 (개월)', 36, {min:1, max:maxLoanMonths, step:1}) + '</div>'
-      + '<p class="loan-note">고정금리로 매월 말에 상환한다고 가정합니다. 수수료와 별도 거치기간은 제외하며, 은행의 일할 계산이나 반올림 방식에 따라 실제 금액은 달라질 수 있습니다.</p>';
-  }
-  if (id === 'salary') {
-    return '<p class="salary-intro">2026년 7~12월 직장인 기준입니다. 퇴직금을 제외한 연봉을 입력하세요.</p>'
-      + field('annual', '세전 연봉 (만원)', 4800, {min:0.0001, step:0.0001})
-      + field('exempt', '연봉에 포함된 월 비과세액 (만원)', 20, {min:0, step:0.0001})
-      + '<p class="field-hint">식대 등 매월 비과세로 받는 금액을 합산하세요. 없으면 0으로 입력하세요.</p>'
-      + '<div class="pair salary-family">' + field('family', '공제대상 가족 (본인 포함)', 1, {min:1, step:1})
-      + field('children', '그중 8~20세 자녀', 0, {min:0, step:1}) + '</div>';
-  }
-  if (id === 'percent') return select('mode','계산 방식',[['portion','기준값의 몇 %는 얼마인가요?'],['ratio','비교값은 기준값의 몇 %인가요?'],['change','기준값에서 몇 % 변했나요?']],'portion') + field('base','기준값',10000) + field('part','비율 (%)',15);
-  if (id === 'discount') return field('price','원래 가격 (원)',50000,{min:0,step:1}) + field('rate','할인율 (%)',20,{min:0,max:100});
-  if (id === 'dates') return field('start','시작일',localDate(0),{type:'date'}) + field('end','종료일',localDate(7),{type:'date'}) + '<label class="check"><input type="checkbox" name="inclusive">시작일을 1일로 포함</label>';
-  if (id === 'units') return select('category','단위 종류',Object.entries(units).map(([id,u]) => [id,u.name]),'length') + field('amount','변환할 값',1,{min:0}) + '<div class="pair" id="unit-fields">' + unitFields('length') + '</div>';
-  return field('total','함께 쓴 총금액 (원)',35000,{min:0,step:1}) + field('count','인원수 (명)',3,{min:1,step:1});
-}
 function updateRentFields() {
   const { direction, jeonse, monthly, deposit } = form.elements;
   const toMonthly = direction.value === 'toMonthly';
@@ -150,7 +91,23 @@ function renderResult() {
   box.hidden = false;
 }
 function showTool() {
-  active = catalog.find(tool => '#' + tool.id === location.hash) || catalog[0];
+  const legacy = catalog.find(tool => '#' + tool.id === location.hash);
+  if (legacy) history.replaceState(null, '', toolPath(legacy.id) + location.search);
+  active = toolFromPath(location.pathname) || catalog[0];
+  $('#hero-title').textContent = active.id === 'basic' ? '생활 계산기' : active.name;
+  $('#hero-description').textContent = active.detail;
+  $('#tool-description').textContent = descriptions[active.id];
+  const title = active.id === 'basic' ? '생활 계산기 · 도구들' : active.name + ' · 도구들';
+  const canonical = siteOrigin + toolPath(active.id);
+  document.title = title;
+  $('meta[name="description"]').content = descriptions[active.id];
+  $('link[rel="canonical"]').href = canonical;
+  $('meta[property="og:title"]').content = title;
+  $('meta[property="og:description"]').content = descriptions[active.id];
+  $('meta[property="og:url"]').content = canonical;
+  // Anchor-only navigation and repeated clicks must not discard form inputs.
+  if (renderedToolId === active.id) return;
+  renderedToolId = active.id;
   const basic = active.id === 'basic';
   $('#tool-title').textContent = active.name;
   $('#active-icon').className = 'tool-icon ' + active.color;
@@ -160,7 +117,6 @@ function showTool() {
   form.hidden = basic;
   $('#tool-list').innerHTML = catalog.filter(tool => tool !== active).map(toolRow).join('');
   $('#other-count').textContent = (catalog.length - 1) + '개';
-  document.title = active.name + ' · 도구들';
   if (!basic) {
     form.innerHTML = '<div class="form-fields">' + formFields(active.id) + '<button class="primary" type="submit">계산하기</button></div><div id="form-result" class="form-result" aria-live="polite" hidden></div>';
     if (active.id === 'rent') {
@@ -251,10 +207,11 @@ dialog.addEventListener('click', event => {
 });
 document.addEventListener('click', event => {
   const link = event.target.closest('[data-open]');
-  if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
   event.preventDefault();
   if (dialog.open) dialog.close();
-  if (location.hash !== link.hash) location.hash = link.hash;
+  if (location.pathname !== link.pathname || location.hash) history.pushState(null, '', link.pathname);
+  showTool();
   $('#tool-title').focus({preventScroll:true});
   $('#workspace').scrollIntoView({block:'nearest'});
 });
@@ -277,6 +234,7 @@ document.addEventListener('keydown', event => {
   enterKey(key);
 });
 window.addEventListener('hashchange',showTool);
+window.addEventListener('popstate', () => { if (dialog.open) dialog.close(); showTool(); });
 window.addEventListener('storage', event => {
   if (event.key !== 'dogudl.favorites') return;
   favorites = readFavorites();

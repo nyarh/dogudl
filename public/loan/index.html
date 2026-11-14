@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f8fb">
+  <meta name="description" content="대출금액, 연이율, 대출기간을 입력하여 원리금균등·원금균등·만기일시상환의 총이자와 월별 상환표를 비교합니다. 고정금리와 매월 말 상환을 가정하며 수수료와 별도 거치기간은 제외합니다.">
+  <link rel="canonical" href="https://dogudl.com/loan/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="대출 이자 계산기 · 도구들">
+  <meta property="og:description" content="대출금액, 연이율, 대출기간을 입력하여 원리금균등·원금균등·만기일시상환의 총이자와 월별 상환표를 비교합니다. 고정금리와 매월 말 상환을 가정하며 수수료와 별도 거치기간은 제외합니다.">
+  <meta property="og:url" content="https://dogudl.com/loan/">
+  <title>대출 이자 계산기 · 도구들</title>
+  <link rel="icon" href="/assets/brand.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css?v=2026-11-rent">
+  <script type="module" src="/app.js?v=2026-11-seo"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">계산기로 바로가기</a>
+  <header class="masthead">
+    <div class="container header-inner">
+      <a class="brand" href="/" data-open="basic" aria-label="도구들 홈"><img src="/assets/brand.svg" alt="" width="34" height="34"><span>도구들</span></a>
+      <nav aria-label="주 메뉴">
+        <a class="nav-item active" href="/" data-open="basic" id="nav-tools">계산기</a>
+        <button class="nav-item" id="nav-favorites">즐겨찾기</button>
+      </nav>
+      <button class="search-trigger" id="search-trigger" aria-label="도구 검색 (Alt+K)"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#search"/></svg><span>도구 검색</span><kbd>Alt K</kbd></button>
+    </div>
+  </header>
+  <main class="container">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-art" aria-hidden="true"><img src="/assets/calculator-hero.jpg" alt="" width="720" height="480" fetchpriority="high"></div>
+      <div class="hero-copy">
+        <h1 id="hero-title">대출 이자 계산기</h1>
+        <p id="hero-description">원리금균등 · 원금균등 · 만기일시상환 비교</p>
+      </div>
+    </section>
+    <div class="workspace" id="workspace">
+      <section class="panel work-panel" aria-labelledby="tool-title">
+        <div class="panel-heading">
+          <div class="heading-group"><span id="active-icon" class="tool-icon cyan"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#bank"/></svg></span><h2 id="tool-title" tabindex="-1">대출 이자 계산기</h2></div>
+          <button class="quiet-button" id="history-trigger" hidden><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#history"/></svg><span>계산 기록</span></button>
+        </div>
+        <p id="tool-description">대출금액, 연이율, 대출기간을 입력하여 원리금균등·원금균등·만기일시상환의 총이자와 월별 상환표를 비교합니다. 고정금리와 매월 말 상환을 가정하며 수수료와 별도 거치기간은 제외합니다.</p>
+        <div id="basic-view" hidden>
+          <div class="display">
+            <span class="display-label">계산 결과</span>
+            <div class="readout"><div id="expression"></div><output id="value" aria-live="polite" aria-label="현재 값">0</output></div>
+          </div>
+          <div class="keypad" id="keypad" aria-label="계산기 키패드">
+            <button class="key utility" data-key="clear" aria-label="전체 지우기">AC</button>
+            <button class="key utility" data-key="sign" aria-label="부호 변경">±</button>
+            <button class="key utility" data-key="%" aria-label="백분율">%</button>
+            <button class="key operator" data-key="/" aria-label="나누기">÷</button>
+            <button class="key" data-key="7">7</button><button class="key" data-key="8">8</button><button class="key" data-key="9">9</button><button class="key operator" data-key="*" aria-label="곱하기">×</button>
+            <button class="key" data-key="4">4</button><button class="key" data-key="5">5</button><button class="key" data-key="6">6</button><button class="key operator" data-key="-" aria-label="빼기">−</button>
+            <button class="key" data-key="1">1</button><button class="key" data-key="2">2</button><button class="key" data-key="3">3</button><button class="key operator" data-key="+" aria-label="더하기">+</button>
+            <button class="key" data-key="0">0</button><button class="key" data-key=".">.</button>
+            <button class="key" data-key="back" aria-label="한 자리 지우기"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#back"/></svg></button>
+            <button class="key equal" data-key="=" aria-label="계산하기">=</button>
+          </div>
+          <div class="keyboard-note"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#keyboard"/></svg>키보드로도 입력할 수 있어요</div>
+        </div>
+        <form id="special-view"><div class="form-fields"><label class="field"><span>대출금액 (만원)</span><input required name="principal" type="number" value="3000" step="0.0001" min="0.0001" ></label><div class="pair"><label class="field"><span>연이율 (%)</span><input required name="rate" type="number" value="4.5" step="any" min="0" ></label><label class="field"><span>대출기간 (개월)</span><input required name="months" type="number" value="36" step="1" min="1" max="1200"></label></div><p class="loan-note">고정금리로 매월 말에 상환한다고 가정합니다. 수수료와 별도 거치기간은 제외하며, 은행의 일할 계산이나 반올림 방식에 따라 실제 금액은 달라질 수 있습니다.</p><button class="primary" type="submit">계산하기</button></div><div id="form-result" class="form-result" aria-live="polite" hidden></div></form>
+        <template id="salary-basis">
+          <details class="salary-basis">
+            <summary>계산 기준과 출처</summary>
+            <p>퇴직금을 제외한 연봉을 12개월로 균등 분할하고, 월급에서 비과세액을 뺀 금액을 보험료 산정 보수로 사용합니다. 회사가 신고한 보수, 상여금 지급 시기, 보험료 정산이나 감면에 따라 급여명세서와 차이가 날 수 있습니다.</p>
+            <ul>
+              <li>근로소득세는 2026년 3월 시행 간이세액표의 100% 원천징수 기준입니다. 가족 수에는 본인과 기본공제 대상 가족을 포함합니다. 지방소득세는 근로소득세의 10%입니다. <a href="https://teht.hometax.go.kr/doc/sf/a/a/근로소득%20간이세액표_2026.03.01.xlsx">홈택스 간이세액표 (엑셀)</a></li>
+              <li>국민연금 근로자 부담률은 4.75%이며, 7월부터 기준소득월액은 41만~659만원입니다. <a href="https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0038M0.do">국민연금공단 보험료 안내</a></li>
+              <li>건강보험은 보수의 3.595%, 장기요양보험은 건강보험료의 13.14%를 적용합니다. <a href="https://edi.nhis.or.kr/portal/images/popup/20251204_pop01longdesc.html">국민건강보험공단 보험료율</a></li>
+              <li>고용보험 근로자 부담률은 0.9%입니다. 산재보험료는 사업주가 부담합니다. <a href="https://www.moel.go.kr/info/astmgmt/employ/employList.do">고용노동부 고용보험 안내</a></li>
+            </ul>
+          </details>
+        </template>
+      </section>
+      <aside class="panel list-panel" aria-labelledby="other-tools">
+        <div class="list-heading"><h2 id="other-tools">다른 계산기</h2><span id="other-count">8개</span></div>
+        <div id="tool-list"><a class="tool-row" href="/" data-open="basic"><span class="tool-icon blue"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#calculator"/></svg></span><span class="tool-info"><span class="tool-name">기본 계산기</span><span class="tool-detail">사칙연산과 백분율을 간편하게</span></span></a><a class="tool-row" href="/salary/" data-open="salary"><span class="tool-icon green"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#wallet"/></svg></span><span class="tool-info"><span class="tool-name">연봉 실수령액 계산기</span><span class="tool-detail">세전 연봉으로 월급과 공제 내역 확인</span></span></a><a class="tool-row" href="/rent/" data-open="rent"><span class="tool-icon purple"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#house"/></svg></span><span class="tool-info"><span class="tool-name">전월세 상호전환 계산기</span><span class="tool-detail">전세 보증금과 월세를 원하는 전환율로 환산</span></span></a><a class="tool-row" href="/percent/" data-open="percent"><span class="tool-icon purple"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#percent"/></svg></span><span class="tool-info"><span class="tool-name">퍼센트 계산기</span><span class="tool-detail">전체 비율과 증감률 계산</span></span></a><a class="tool-row" href="/discount/" data-open="discount"><span class="tool-icon coral"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#tag"/></svg></span><span class="tool-info"><span class="tool-name">할인 계산기</span><span class="tool-detail">할인 금액과 최종 가격 확인</span></span></a><a class="tool-row" href="/dates/" data-open="dates"><span class="tool-icon green"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#calendar"/></svg></span><span class="tool-info"><span class="tool-name">날짜 계산기</span><span class="tool-detail">두 날짜 사이의 일수 계산</span></span></a><a class="tool-row" href="/units/" data-open="units"><span class="tool-icon cyan"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#ruler"/></svg></span><span class="tool-info"><span class="tool-name">단위 변환기</span><span class="tool-detail">길이, 면적, 무게, 부피 변환</span></span></a><a class="tool-row" href="/split/" data-open="split"><span class="tool-icon pink"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#users"/></svg></span><span class="tool-info"><span class="tool-name">더치페이 계산기</span><span class="tool-detail">함께 쓴 금액을 원 단위로 정산</span></span></a></div>
+      </aside>
+    </div>
+    <noscript>계산기를 사용하려면 브라우저의 자바스크립트를 켜 주세요.</noscript>
+  </main>
+  <footer class="site-footer"><div class="container footer-inner"><span class="footer-brand"><img src="/assets/brand.svg" alt="" width="20" height="20">도구들</span><span>© dogudl.com</span></div></footer>
+  <dialog id="tool-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-header"><h2 id="dialog-title"></h2><button id="dialog-close" class="icon-button" aria-label="닫기"><svg class="icon" aria-hidden="true"><use href="/assets/icons.svg#close"/></svg></button></div>
+    <div id="dialog-content"></div>
+  </dialog>
+</body>
+</html>

@@ -23,8 +23,10 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Test calculators
-        run: node --test tests/calculations.test.mjs
+      - name: Build static tool pages
+        run: node scripts/build.mjs
+      - name: Test calculators and SEO pages
+        run: node --test tests/*.test.mjs
       - name: Deploy public to dogudl.pages.dev
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
