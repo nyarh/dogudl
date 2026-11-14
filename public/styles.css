@@ -100,6 +100,18 @@ h2 { font-size: 21px; line-height: 1.4; letter-spacing: -.055em; }
 .form-result b { display: block; font-size: 26px; margin: 5px 0; overflow-wrap: anywhere; }
 .form-result small, .form-result p { font-size: 13px; line-height: 1.6; }
 .form-error { color: #a43b30; font-size: 14px; }
+.housing-fields { display: grid; min-width: 0; gap: 12px; margin: 0; padding: 12px 14px 14px; border: 1px solid var(--border); border-radius: 10px; }
+.housing-fields legend { padding: 0 5px; font-size: 14px; font-weight: 700; }
+.housing-fields .pair { grid-template-columns: repeat(2,minmax(0,1fr)); align-items: end; }
+.housing-table { margin-top: 18px; width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.housing-table caption, .housing-threshold strong { font-weight: 700; text-align: left; }
+.housing-table caption { padding-bottom: 6px; }
+.housing-table td, .housing-table th { text-align: right; border-bottom: 1px solid #d4ddf3; padding: 7px 2px; overflow-wrap: anywhere; }
+.housing-table th:first-child { text-align: left; }
+.housing-table tbody th { font-weight: 500; }
+.housing-table tbody tr:last-child { font-weight: 700; }
+.housing-threshold { padding-top: 12px; }
+.housing-threshold strong { display: block; }
 .rent-direction { margin: 0; padding: 0; border: 0; min-width: 0; }
 .rent-direction legend { margin-bottom: 7px; padding: 0; color: #49576d; font-size: 13px; font-weight: 650; }
 .rent-direction > div { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 11px; background: #f0f3fa; }

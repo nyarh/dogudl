@@ -7,6 +7,54 @@ const salaryExample = { annual: 4800, exempt: 20, family: 1, children: 0 };
 
 const loanExample = { principal: '3000', rate: '4.5', months: '36' };
 
+const housingExample = { cash: 10000, rate: 4.2, months: 24, jeonseDeposit: 20000,
+  jeonseFee: 0, rentDeposit: 10000, rent: 40, rentFee: 0 };
+
+test('전세 2억과 보증금 1억·월세 40만원의 2년 비용과 손익분기 금리를 비교한다', () => {
+  const result = calculate('housing-cost', housingExample);
+  const { jeonse, rental, breakEven } = result.comparison;
+  assert.equal(result.value, '전세가 월 50,000원 저렴해요');
+  assert.equal(jeonse.loan, 100_000_000);
+  assert.equal(jeonse.interest, 350_000);
+  assert.equal(rental.loan, 0);
+  assert.equal(jeonse.total, 8_400_000);
+  assert.equal(rental.total, 9_600_000);
+  assert.equal(rental.total - jeonse.total, 1_200_000);
+  assert.equal(breakEven, 4.8);
+  assert.equal(calculate('housing-cost', { ...housingExample, rate: breakEven }).value, '두 매물의 월 비용이 같아요');
+  assert.equal(calculate('housing-cost', { ...housingExample, rate: 6 }).value, '월세가 월 100,000원 저렴해요');
+});
+
+test('두 보증금 모두 대출할 때 관리비와 월세, 이자를 총비용에 반영한다', () => {
+  const { jeonse, rental, breakEven } = calculate('housing-cost', {
+    ...housingExample, cash: 2000, jeonseFee: 12, rentFee: 8, months: 12
+  }).comparison;
+  assert.equal(jeonse.monthly, 750_000);
+  assert.equal(rental.monthly, 760_000);
+  assert.equal(rental.total - jeonse.total, 120_000);
+  assert.ok(Math.abs(breakEven - 4.32) < 1e-10);
+});
+
+test('무대출, 무이자, 동일 비용, 역전 금리가 0% 또는 음수인 경우를 구분한다', () => {
+  const compare = extra => calculate('housing-cost', { ...housingExample, ...extra }).comparison;
+  assert.deepEqual([compare({ cash: 30000 }).breakEven, compare({ cash: 30000 }).equalAtAllRates], [null, false]);
+  assert.equal(compare({ jeonseDeposit: 10000, rent: 0 }).equalAtAllRates, true);
+  assert.equal(compare({ rent: 0 }).breakEven, 0);
+  assert.equal(compare({ jeonseFee: 50 }).breakEven, null);
+  assert.equal(compare({ rate: 0 }).jeonse.interest, 0);
+  const reversed = compare({ jeonseDeposit: 10000, rentDeposit: 20000, jeonseFee: 80 });
+  assert.equal(reversed.breakEven, 4.8);
+  assert.ok(reversed.rental.monthly < reversed.jeonse.monthly);
+  assert.equal(compare({ jeonseDeposit: '10006', rate: 2.01 }).jeonse.interest, 101);
+});
+
+test('비용 비교에서 빈 필드, 음수, 잘못된 계약기간, 안전 범위를 넘는 금액을 거부한다', () => {
+  for (const invalid of [{ cash: '' }, { rentFee: -1 }, { rate: -2 }, { rate: 'NaN' }, { months: 0 },
+    { months: 1.5 }, { jeonseDeposit: 0.00001 }, { rate: 1e300 }]) {
+    assert.throws(() => calculate('housing-cost', { ...housingExample, ...invalid }));
+  }
+});
+
 test('직접 입력한 전환율로 월세 보증금을 반영하여 왕복 환산한다', () => {
   const shared = { deposit: '6000', rate: '5.4' };
   const forward = calculate('rent', { ...shared, direction: 'toMonthly', jeonse: '26000' });

@@ -1,8 +1,8 @@
-import { Calculator, calculate, salaryPeriods } from './calculations.mjs?v=2027-h1';
-import { formFields, unitFields } from './form-fields.mjs?v=2027-h1';
-import { renderLoanResult } from './loan-view.js?v=2027-h1';
+import { Calculator, calculate, format, salaryPeriods } from './calculations.mjs?v=housing-cost';
+import { formFields, unitFields } from './form-fields.mjs?v=housing-cost';
+import { renderLoanResult } from './loan-view.js?v=housing-cost';
 
-import { catalog, descriptions, siteOrigin, toolPath, toolFromPath } from './catalog.mjs?v=2027-h1';
+import { catalog, descriptions, siteOrigin, toolPath, toolFromPath } from './catalog.mjs?v=housing-cost';
 
 const $ = selector => document.querySelector(selector);
 const icon = name => `<svg class="icon" aria-hidden="true"><use href="/assets/icons.svg?v=2026-11-rent#${name}"/></svg>`;
@@ -62,6 +62,25 @@ function updateSalaryBasis() {
   $('#salary-pension-rate').textContent = (period.pensionBps / 100).toFixed(2) + '%';
   $('#salary-care-rate').textContent = (period.careBps / 100).toFixed(2) + '%';
 }
+function showHousingComparison(box, { jeonse, rental, breakEven, equalAtAllRates }) {
+  const rows = [
+    ['필요 대출금', 'loan'], ['월 대출이자', 'interest'], ['월세', 'rent'],
+    ['월 관리비', 'fee'], ['월 비용 합계', 'monthly'], ['계약기간 총비용', 'total']
+  ];
+  const body = rows.map(([label, key]) => `<tr><th scope="row">${label}</th>
+    <td>${format(jeonse[key])}원</td><td>${format(rental[key])}원</td></tr>`).join('');
+  let threshold;
+  if (equalAtAllRates) threshold = '모든 금리에서 두 매물의 비용이 같습니다.';
+  else if (breakEven === null) threshold = '0% 이상에서 두 매물의 비용이 같아지는 금리는 없습니다.';
+  else {
+    const cheaperAbove = jeonse.loan > rental.loan ? '월세' : '전세';
+    const displayRate = Number(breakEven.toPrecision(5));
+    threshold = `연 ${displayRate === breakEven ? '' : '약 '}${format(displayRate)}% · 이보다 높으면 ${cheaperAbove}가 저렴합니다.`;
+  }
+  box.insertAdjacentHTML('beforeend', `<table class="housing-table"><caption>매물별 비용 내역</caption>
+    <thead><tr><th scope="col">항목</th><th scope="col">전세</th><th scope="col">월세</th></tr></thead>
+    <tbody>${body}</tbody></table><p class="housing-threshold"><strong>손익분기 대출금리</strong> ${threshold}</p>`);
+}
 function renderResult() {
   const box = $('#form-result');
   try {
@@ -86,6 +105,7 @@ function renderResult() {
       note.textContent = result.note;
       box.append(note);
     }
+    if (result.comparison) showHousingComparison(box, result.comparison);
     if (result.breakdown) {
       const list = document.createElement('dl');
       list.className = 'deductions';
@@ -150,6 +170,7 @@ function showTool() {
       updateSalaryBasis();
       renderResult();
     }
+    if (active.id === 'housing-cost') renderResult();
   } else refreshCalculator();
 }
 form.addEventListener('input', () => { $('#form-result').hidden = true; });

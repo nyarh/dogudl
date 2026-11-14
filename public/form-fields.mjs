@@ -1,4 +1,4 @@
-import { units, defaultSalaryPeriod, salaryPeriods } from './calculations.mjs?v=2027-h1';
+import { units, defaultSalaryPeriod, salaryPeriods } from './calculations.mjs?v=housing-cost';
 import { maxLoanMonths } from './loan.mjs';
 function field(name, label, value, options = {}) {
   const { type = 'number', min, max, step = 'any' } = options;
@@ -19,6 +19,21 @@ function localDate(offset) {
   return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
 }
 export function formFields(id) {
+  if (id === 'housing-cost') {
+    const money = { min: 0, step: 0.0001 };
+    return '<fieldset class="housing-fields"><legend>비교 조건</legend>'
+      + field('cash', '보증금에 쓸 자기자금 (만원)', 10000, money)
+      + '<div class="pair">' + field('rate', '연 대출금리 (%)', 4.2, {min:0})
+      + field('months', '계약기간 (개월)', 24, {min:1, step:1}) + '</div></fieldset>'
+      + '<fieldset class="housing-fields"><legend>전세 매물</legend><div class="pair">'
+      + field('jeonseDeposit', '전세 보증금 (만원)', 20000, money)
+      + field('jeonseFee', '전세 월 관리비 (만원)', 0, money) + '</div></fieldset>'
+      + '<fieldset class="housing-fields"><legend>월세 매물</legend>'
+      + field('rentDeposit', '월세 보증금 (만원)', 10000, money)
+      + '<div class="pair">' + field('rent', '월세 (만원)', 40, money)
+      + field('rentFee', '월세 월 관리비 (만원)', 0, money) + '</div></fieldset>'
+      + '<p class="loan-note">두 매물 모두 자기자금을 먼저 쓰고 부족한 보증금만 같은 고정금리로 빌립니다. 매월 이자만 내고 만기에 원금을 갚는 조건입니다. 돌려받는 보증금, 자기자금의 기회비용, 보증료와 중개수수료는 비용에서 제외합니다.</p>';
+  }
   if (id === 'rent') {
     const money = { min: 0, step: 0.0001 };
     return `<fieldset class="rent-direction"><legend>전환 방향</legend><div>

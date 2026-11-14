@@ -3,6 +3,7 @@ export { defaultSalaryPeriod, salaryPeriods } from './salary.mjs?v=2027-h1';
 import { compareLoans } from './loan.mjs';
 import { convertRent } from './rent.mjs';
 import { wonFromManwon } from './money.mjs';
+import { compareHousingCosts } from './housing-cost.mjs';
 
 const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
 const pretty = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 12 });
@@ -116,6 +117,19 @@ function day(raw) {
 }
 export function calculate(id, form) {
   switch (id) {
+    case 'housing-cost': {
+      const rate = nonNegative(number(form.rate, '대출금리'));
+      const comparison = compareHousingCosts(form, rate, number(form.months, '계약기간'));
+      const { jeonse, rental, months } = comparison;
+      const savings = Math.abs(jeonse.monthly - rental.monthly);
+      const cheaper = jeonse.monthly < rental.monthly ? '전세' : '월세';
+      return {
+        label: `연 ${format(rate)}% 기준 월 주거비`,
+        value: savings ? `${cheaper}가 월 ${format(savings)}원 저렴해요` : '두 매물의 월 비용이 같아요',
+        detail: `계약 ${format(months)}개월 동안 비용 차이 ${format(Math.abs(jeonse.total - rental.total))}원`,
+        comparison
+      };
+    }
     case 'rent': {
       const deposit = wonFromManwon(form.deposit, '월세 보증금');
       const rate = nonNegative(number(form.rate, '연 전환율'));

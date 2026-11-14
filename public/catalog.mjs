@@ -3,6 +3,7 @@ export const catalog = [
   { id: 'salary', name: '연봉 실수령액 계산기', detail: '세전 연봉으로 월급과 공제 내역 확인', icon: 'wallet', color: 'green' },
   { id: 'loan', name: '대출 이자 계산기', detail: '원리금균등 · 원금균등 · 만기일시상환 비교', icon: 'bank', color: 'cyan' },
   { id: 'rent', name: '전월세 상호전환 계산기', detail: '전세 보증금과 월세를 원하는 전환율로 환산', icon: 'house', color: 'purple' },
+  { id: 'housing-cost', name: '전세·월세 실제 비용 비교기', detail: '두 매물의 월 주거비와 손익분기 금리 비교', icon: 'house', color: 'green' },
   { id: 'percent', name: '퍼센트 계산기', detail: '전체 비율과 증감률 계산', icon: 'percent', color: 'purple' },
   { id: 'discount', name: '할인 계산기', detail: '할인 금액과 최종 가격 확인', icon: 'tag', color: 'coral' },
   { id: 'dates', name: '날짜 계산기', detail: '두 날짜 사이의 일수 계산', icon: 'calendar', color: 'green' },
@@ -12,6 +13,7 @@ export const catalog = [
 export const siteOrigin = "https://dogudl.com";
 export const toolPath = id => id === "basic" ? "/" : `/${id}/`;
 export const descriptions = {
+  "housing-cost": "내 자금과 대출금리로 두 매물의 보증금 대출이자, 월세, 관리비를 비교합니다. 한 달과 계약기간 전체의 비용 차이, 두 매물의 비용이 같아지는 대출금리를 확인하세요.",
   "basic": "숫자와 연산자를 입력하여 더하기, 빼기, 곱하기, 나누기와 백분율을 계산합니다. 일반 탁상 계산기처럼 입력 순서대로 연산하며, % 키는 현재 숫자를 100으로 나눕니다.",
   "salary": "세전 연봉과 월 비과세액, 공제대상 가족 수로 예상 월 실수령액과 공제 내역을 계산합니다. 2026년 하반기와 2027년 상반기 예상 기준을 선택해 비교할 수 있습니다.",
   "loan": "대출금액, 연이율, 대출기간을 입력하여 원리금균등·원금균등·만기일시상환의 총이자와 월별 상환표를 비교합니다. 고정금리와 매월 말 상환을 가정하며 수수료와 별도 거치기간은 제외합니다.",
