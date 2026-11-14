@@ -22,14 +22,6 @@ node --test tests/calculations.test.mjs
 
 ## Cloudflare Pages 배포
 
-Cloudflare 대시보드의 **Workers & Pages → Create application → Pages → Import an existing Git repository**에서 GitHub의 `nyarh/dogudl`을 선택합니다.
+`main`에 푸시하면 GitHub Actions가 계산 테스트를 실행하고, 통과한 커밋의 `public/` 폴더를 Cloudflare Pages의 `dogudl` 프로젝트에 배포합니다. [공개 사이트](https://dogudl.pages.dev/) · [배포 기록](https://github.com/nyarh/dogudl/actions/workflows/deploy.yml)
 
-| 설정 | 값 |
-| --- | --- |
-| 프로덕션 브랜치 | `main` |
-| 프레임워크 | None |
-| 빌드 명령 | 비워 둠 |
-| 빌드 출력 디렉터리 | `public` |
-| 루트 디렉터리 | 기본값 |
-
-**Save and Deploy**를 누르면 첫 배포가 시작됩니다. 연결 후에는 `main`에 푸시할 때마다 같은 설정으로 배포됩니다. 배포가 성공하면 **Custom domains**에서 `dogudl.com`을 연결하고 DNS 상태를 확인합니다. [Cloudflare Pages Git 연동 가이드](https://developers.cloudflare.com/pages/get-started/git-integration/)
+GitHub 저장소의 **Settings → Secrets and variables → Actions**에서 `CLOUDFLARE_ACCOUNT_ID`는 변수로, `CLOUDFLARE_API_TOKEN`은 시크릿으로 설정합니다. 토큰에는 해당 계정의 **Cloudflare Pages → Edit** 권한이 필요합니다.
