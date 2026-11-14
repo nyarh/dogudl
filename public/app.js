@@ -1,11 +1,12 @@
-import { Calculator, calculate, units } from './calculations.mjs?v=2026-11-loan';
+import { Calculator, calculate, units } from './calculations.mjs?v=2026-11-rent';
 import { maxLoanMonths } from './loan.mjs';
-import { renderLoanResult } from './loan-view.js';
+import { renderLoanResult } from './loan-view.js?v=2026-11-rent';
 
 const catalog = [
   { id: 'basic', name: '기본 계산기', detail: '사칙연산과 백분율을 간편하게', icon: 'calculator', color: 'blue' },
   { id: 'salary', name: '연봉 실수령액 계산기', detail: '세전 연봉으로 월급과 공제 내역 확인', icon: 'wallet', color: 'green' },
   { id: 'loan', name: '대출 이자 계산기', detail: '원리금균등 · 원금균등 · 만기일시상환 비교', icon: 'bank', color: 'cyan' },
+  { id: 'rent', name: '전월세 상호전환 계산기', detail: '전세 보증금과 월세를 원하는 전환율로 환산', icon: 'house', color: 'purple' },
   { id: 'percent', name: '퍼센트 계산기', detail: '전체 비율과 증감률 계산', icon: 'percent', color: 'purple' },
   { id: 'discount', name: '할인 계산기', detail: '할인 금액과 최종 가격 확인', icon: 'tag', color: 'coral' },
   { id: 'dates', name: '날짜 계산기', detail: '두 날짜 사이의 일수 계산', icon: 'calendar', color: 'green' },
@@ -13,7 +14,7 @@ const catalog = [
   { id: 'split', name: '더치페이 계산기', detail: '함께 쓴 금액을 원 단위로 정산', icon: 'users', color: 'pink' }
 ];
 const $ = selector => document.querySelector(selector);
-const icon = name => `<svg class="icon" aria-hidden="true"><use href="./assets/icons.svg?v=2026-11-loan#${name}"/></svg>`;
+const icon = name => `<svg class="icon" aria-hidden="true"><use href="./assets/icons.svg?v=2026-11-rent#${name}"/></svg>`;
 const toolIcon = tool => `<span class="tool-icon ${tool.color}">${icon(tool.icon)}</span>`;
 const dialog = $('#tool-dialog');
 const form = $('#special-view');
@@ -67,6 +68,18 @@ function localDate(offset) {
   return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
 }
 function formFields(id) {
+  if (id === 'rent') {
+    const money = { min: 0, step: 0.0001 };
+    return `<fieldset class="rent-direction"><legend>전환 방향</legend><div>
+      <label><input type="radio" name="direction" value="toMonthly" checked><span>전세 → 월세</span></label>
+      <label><input type="radio" name="direction" value="toJeonse"><span>월세 → 전세</span></label>
+      </div></fieldset>`
+      + field('jeonse', '현재 전세 보증금 (만원)', 30000, money)
+      + field('deposit', '월세로 바꾼 뒤 남길 보증금 (만원)', 10000, money)
+      + field('monthly', '현재 월세 (만원)', 80, money)
+      + field('rate', '연 전월세 전환율 (%)', 4.8, { min: 0 })
+      + '<p class="field-hint">4.8%는 예시입니다. 비교할 전환율을 직접 입력하세요. 결과는 원 단위로 반올림합니다.</p>';
+  }
   if (id === 'loan') {
     return field('principal', '대출금액 (만원)', 3000, {min:0.0001, step:0.0001})
       + '<div class="pair">' + field('rate', '연이율 (%)', 4.5, {min:0})
@@ -87,11 +100,24 @@ function formFields(id) {
   if (id === 'units') return select('category','단위 종류',Object.entries(units).map(([id,u]) => [id,u.name]),'length') + field('amount','변환할 값',1,{min:0}) + '<div class="pair" id="unit-fields">' + unitFields('length') + '</div>';
   return field('total','함께 쓴 총금액 (원)',35000,{min:0,step:1}) + field('count','인원수 (명)',3,{min:1,step:1});
 }
+function updateRentFields() {
+  const { direction, jeonse, monthly, deposit } = form.elements;
+  const toMonthly = direction.value === 'toMonthly';
+  jeonse.disabled = !toMonthly;
+  jeonse.labels[0].hidden = !toMonthly;
+  monthly.disabled = toMonthly;
+  monthly.labels[0].hidden = toMonthly;
+  deposit.labels[0].querySelector('span').textContent = toMonthly ? '월세로 바꾼 뒤 남길 보증금 (만원)' : '현재 월세 보증금 (만원)';
+}
 function renderResult() {
   const box = $('#form-result');
   try {
     const result = calculate(active.id,Object.fromEntries(new FormData(form)));
     box.replaceChildren();
+    if (active.id === 'rent') {
+      const nextInput = form.elements.direction.value === 'toMonthly' ? form.elements.monthly : form.elements.jeonse;
+      nextInput.value = String(result.amount / 10000);
+    }
     if (result.plans) {
       renderLoanResult(box, result.plans);
       box.hidden = false;
@@ -137,6 +163,10 @@ function showTool() {
   document.title = active.name + ' · 도구들';
   if (!basic) {
     form.innerHTML = '<div class="form-fields">' + formFields(active.id) + '<button class="primary" type="submit">계산하기</button></div><div id="form-result" class="form-result" aria-live="polite" hidden></div>';
+    if (active.id === 'rent') {
+      updateRentFields();
+      renderResult();
+    }
     if (active.id === 'loan') {
       form.querySelector('button[type="submit"]').textContent = '상환 방식 비교하기';
       $('#form-result').classList.add('loan-result');
@@ -150,6 +180,10 @@ function showTool() {
 }
 form.addEventListener('input', () => { $('#form-result').hidden = true; });
 form.addEventListener('change', event => {
+  if (event.target.name === 'direction') {
+    updateRentFields();
+    if (form.checkValidity()) renderResult();
+  }
   if (event.target.name === 'category') $('#unit-fields').innerHTML = unitFields(event.target.value);
   if (event.target.name === 'mode') form.elements.part.labels[0].querySelector('span').textContent = event.target.value === 'portion' ? '비율 (%)' : '비교값';
 });

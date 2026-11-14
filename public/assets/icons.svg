@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="house" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5.5 9v11h13V9M10 20v-7h4v7"/></symbol>
   <symbol id="bank" viewBox="0 0 24 24"><path d="M3 8.5 12 3l9 5.5v1H3zm2 12h14M3 18h18M6 12v4m6-4v4m6-4v4"/></symbol>
   <symbol id="wallet" viewBox="0 0 24 24"><path d="M20 8V6a2 2 0 0 0-2-2H6a3 3 0 0 0 0 6h14v9a1 1 0 0 1-1 1H6a3 3 0 0 1-3-3V7"/><path d="M20 12h-4a2 2 0 0 0 0 4h4z"/></symbol>
   <symbol id="calculator" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8.5 7h7M8.5 11h1m5 0h1m-7 4h1m5 0h1m-7 3h1m5 0h1"/></symbol>

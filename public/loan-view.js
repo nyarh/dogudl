@@ -1,4 +1,4 @@
-import { format } from './calculations.mjs?v=2026-11-loan';
+import { format } from './calculations.mjs?v=2026-11-rent';
 
 const won = amount => format(amount) + '원';
 const columns = ['첫 달 상환액', '마지막 달 상환액', '총이자'];

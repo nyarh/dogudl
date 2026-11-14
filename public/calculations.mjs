@@ -1,5 +1,6 @@
 import { monthlySalary } from './salary.mjs';
 import { compareLoans } from './loan.mjs';
+import { convertRent } from './rent.mjs';
 import { wonFromManwon } from './money.mjs';
 
 const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
@@ -114,6 +115,27 @@ function day(raw) {
 }
 export function calculate(id, form) {
   switch (id) {
+    case 'rent': {
+      const deposit = wonFromManwon(form.deposit, '월세 보증금');
+      const rate = nonNegative(number(form.rate, '연 전환율'));
+      const won = value => format(value) + '원';
+      let amount, label, detail;
+      if (form.direction === 'toMonthly') {
+        const jeonse = wonFromManwon(form.jeonse, '전세 보증금');
+        if (deposit > jeonse) throw new Error('남길 보증금은 전세 보증금 이하로 입력해 주세요.');
+        amount = convertRent(jeonse - deposit, rate, true);
+        label = '전환 후 월세';
+        detail = `(${won(jeonse)} − ${won(deposit)}) × ${rate}% ÷ 12`;
+      } else if (form.direction === 'toJeonse') {
+        if (rate === 0) throw new Error('월세를 전세로 바꾸려면 0보다 큰 연 전환율을 입력해 주세요.');
+        const monthly = wonFromManwon(form.monthly, '월세 금액');
+        amount = deposit + convertRent(monthly, rate, false);
+        label = '전환 후 전세 보증금';
+        detail = `${won(deposit)} + (${won(monthly)} × 12 ÷ ${rate}%)`;
+      } else throw new Error('전환 방향을 선택해 주세요.');
+      if (!Number.isSafeInteger(amount)) throw new Error('계산 범위를 초과했어요. 금액과 전환율을 확인해 주세요.');
+      return { label, value: won(amount), detail, amount };
+    }
     case 'loan':
       return { plans: compareLoans(wonFromManwon(form.principal, '대출금액'), number(form.rate, '연이율'), number(form.months, '대출기간')) };
     case 'salary': {

@@ -7,6 +7,40 @@ const salaryExample = { annual: 4800, exempt: 20, family: 1, children: 0 };
 
 const loanExample = { principal: '3000', rate: '4.5', months: '36' };
 
+test('직접 입력한 전환율로 월세 보증금을 반영하여 왕복 환산한다', () => {
+  const shared = { deposit: '6000', rate: '5.4' };
+  const forward = calculate('rent', { ...shared, direction: 'toMonthly', jeonse: '26000' });
+  assert.equal(forward.value, '900,000원');
+  const reverse = calculate('rent', { ...shared, direction: 'toJeonse', monthly: forward.amount / 10000 });
+  assert.equal(reverse.value, '260,000,000원');
+  assert.equal(calculate('rent', { ...shared, rate: '3.6', direction: 'toMonthly', jeonse: '26000' }).amount, 600_000);
+});
+
+test('보증금 없는 월세, 보증금 전액 유지, 월세 0원과 전환율 0%를 처리한다', () => {
+  const forward = { direction: 'toMonthly', jeonse: '24000', deposit: '0', rate: '4' };
+  assert.equal(calculate('rent', forward).amount, 800_000);
+  assert.equal(calculate('rent', { ...forward, deposit: '24000' }).amount, 0);
+  assert.equal(calculate('rent', { ...forward, rate: '0' }).amount, 0);
+  assert.equal(calculate('rent', { direction: 'toJeonse', monthly: '0', deposit: '3500', rate: '4' }).amount, 35_000_000);
+});
+
+test('소수 전환율의 반 원 경계와 원 단위 입력을 두 방향에서 반올림한다', () => {
+  assert.equal(calculate('rent', { direction: 'toMonthly', jeonse: '6', deposit: '0', rate: '2.01' }).amount, 101);
+  assert.equal(calculate('rent', { direction: 'toJeonse', monthly: '0.0001', deposit: '0.0001', rate: '6.4' }).amount, 189);
+  assert.equal(calculate('rent', { direction: 'toMonthly', jeonse: '0.0001', deposit: '0', rate: '1e-7' }).amount, 0);
+});
+
+test('초과 보증금, 비어 있거나 유효하지 않은 입력, 나눌 수 없는 전환율을 거부한다', () => {
+  const forward = { direction: 'toMonthly', jeonse: '10000', deposit: '1000', rate: '5' };
+  for (const invalid of [{ deposit: '10001' }, { deposit: -1 }, { jeonse: '' }, { rate: '' }, { rate: -1 },
+    { direction: 'bad' }, { jeonse: '0.00001' }, { rate: Infinity }]) {
+    assert.throws(() => calculate('rent', { ...forward, ...invalid }));
+  }
+  for (const invalid of [{ rate: 0 }, { rate: '1e-100' }, { monthly: '' }]) {
+    assert.throws(() => calculate('rent', { direction: 'toJeonse', deposit: 0, monthly: 20, rate: 4, ...invalid }));
+  }
+});
+
 test('대출 3천만원의 세 상환 방식별 첫 달·마지막 달과 총이자를 비교한다', () => {
   const { plans } = calculate('loan', loanExample);
   assert.deepEqual(plans.map(plan => [

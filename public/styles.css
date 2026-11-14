@@ -100,6 +100,14 @@ h2 { font-size: 21px; line-height: 1.4; letter-spacing: -.055em; }
 .form-result b { display: block; font-size: 26px; margin: 5px 0; overflow-wrap: anywhere; }
 .form-result small, .form-result p { font-size: 13px; line-height: 1.6; }
 .form-error { color: #a43b30; font-size: 14px; }
+.rent-direction { margin: 0; padding: 0; border: 0; min-width: 0; }
+.rent-direction legend { margin-bottom: 7px; padding: 0; color: #49576d; font-size: 13px; font-weight: 650; }
+.rent-direction > div { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 11px; background: #f0f3fa; }
+.rent-direction label { position: relative; cursor: pointer; }
+.rent-direction input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.rent-direction span { display: block; padding: 10px 4px; border-radius: 8px; text-align: center; color: var(--muted); font-size: 14px; font-weight: 650; }
+.rent-direction input:checked + span { background: white; color: #294cbd; box-shadow: 0 1px 4px #23346024; }
+.rent-direction input:focus-visible + span { outline: 3px solid #6989ff; }
 .loan-note { color: var(--muted); font-size: 13px; line-height: 1.6; word-break: keep-all; }
 .loan-result { color: inherit; background: transparent; padding: 0; margin-top: 24px; }
 .loan-result table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
